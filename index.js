@@ -41,9 +41,25 @@ class ArmRenderer {
 }
 
 class Arm {
-    get angles() {
-	const t = (new Date()).getTime() / 1000
-	return [0.5, -t/2, t]
+    constructor() {
+	this.angles = [0.5, -1/2, 1]
+	this.velocities = [0, 0, 0]
+    }
+    centerOfMass(i) { // This is local center of mass, we need global
+	i = i || 0
+	const lineCenter = [0, 1/2]
+	const local = i == this.angles.length - 1
+	      ? lineCenter
+	      : add(lineCenter, this.centerOfMass(i + 1))
+	return rotate(local, this.angles[i])
+    }
+    torque(i) { // This is not done
+	let globalAngle = this.angles[i]
+	for (let j = i - 1; j != 0; j--) {
+	    globalAngle += this.angles[j]
+	}
+	const c = this.centerOfMass(i)
+	const r = mag(c)
     }
 }
 
@@ -51,4 +67,20 @@ const arm = new Arm()
 
 const ar = new ArmRenderer('arm', arm)
 
-ar.draw()
+function applyGravity(arm, elapsed) {
+    // Todo
+}
+
+function applyInertia(arm, elapsed) {
+    // Todo
+}
+
+function rotate([x, y], angle) {
+    const c = Math.cos(angle)
+    const s = Math.sin(angle)
+    return [c * x - s * y, c * y + s * x]
+}
+
+function add([a, b], [x, y]) {
+    return [a + x, b + y]
+}
